@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+
+{% block title %}sign up{% endblock %}
+
+
+{% block content %}
+
+  <form method="post">
+
+    {% csrf_token %}
+
+    <!--Це повинно бути в кожній формі, щоб django обробляв їх. CSRF тоени потрібні для безпеки-->
+
+    {{ form.username.label }}: <br />
+    {{ form.username }} <br /> <br />
+    {% for error in form.username.errors %}
+      <p>{{ error }}</p>
+    {% endfor %}
+
+    {{ form.email.label }}: <br />
+    {{ form.email }} <br /> <br />
+    {% for error in form.password.errors %}
+      <p>{{ error }}</p>
+    {% endfor %}
+
+    {{ form.password1.label }}: <br />
+    {{ form.password1 }} <br /> <br />
+    {% for error in form.password1.errors %}
+      <p>{{ error }}</p>
+    {% endfor %}
+
+    {{ form.password2.label }}: <br />
+    {{ form.password2 }} <br /> <br />
+    {% for error in form.password2.errors %}
+      <p>{{ error }}</p>
+    {% endfor %}
+
+    <input type="submit" value="Submit">
+
+  </form>
+
+{% endblock %}

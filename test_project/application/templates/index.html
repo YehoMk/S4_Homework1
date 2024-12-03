@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+
+{% block title %}index{% endblock %}
+
+
+{% block content %}
+  {% for post in posts %}
+    <span style="color: #000088;">{{ post.user_info }}</span>
+    <span>{{ post.title }}</span> <a href="{% url 'post_detail' post.id %}">Details</a> <br />
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+
+{% block title %}{{ post.id }}{% endblock %}
+
+
+{% block content %}
+
+  <h3>{{ post.title }}</h3>
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</button>
+  <p>{{ post.content }}</p>
+
+  <hr>
+
+  <form method="post" action="{% url 'create_comment' post.id %}">
+    {% csrf_token %}
+
+    {{ form.content.label }} <br />
+    {{ form.content }} <br /> <br />
+
+    <input type="submit" value="Submit">
+
+  </form>
+
+  {% for comment in post.comments.all %}
+    <span>{{ comment.content }}</span> <a href="{% url 'delete_comment' post.id comment.id %}">delete</a> <br />
+  {% endfor %}
+
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+          <form method="post" action="{% url 'update_view' post.id %}">
+            {% csrf_token %}
+
+            {{ post_form.title.label }} <br />
+            {{ post_form.title }} <br /> <br />
+            {% for error in post_form.title.errors %}
+            <span>{{ error }}</span> <br />
+            {% endfor %}
+
+            {{ post_form.content.label }} <br />
+            {{ post_form.content }} <br /> <br />
+
+            <input type="submit" value="Submit">
+
+          </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
