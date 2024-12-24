@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+
+{% block title %}subscribtion information{% endblock %}
+
+
+{% block content %}
+
+  <h3>Free Subscribers</h3>
+  {% for user in free_subscribers %}
+    {{ user }}
+  {% endfor %}
+
+  <h3>Advcanced Subscribers</h3>
+  {% for user in advanced_subscribers %}
+    {{ user }}
+  {% endfor %}
+
+  <h3>Pro Subscribers</h3>
+  {% for user in pro_subscribers %}
+    {{ user }}
+  {% endfor %}
+
+{% endblock %}

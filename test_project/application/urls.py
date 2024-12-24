@@ -25,5 +25,7 @@ urlpatterns = [
     path("post/<int:id>/comment/delete/<int:comment_id>", views.delete_comment, name="delete_comment"),
     path("profile/", views.profile),
     path("log_out/", views.LogoutView.as_view(), name="log_out"),
-    path("post/<int:id>/update", views.UpdatePostView.as_view(), name="update_view")
+    path("post/<int:id>/update", views.UpdatePostView.as_view(), name="update_view"),
+    path("subscribtion_information/", views.SubscriptionInformationView.as_view()),
+    path("filter_test/", views.FilterTest.as_view())
 ]

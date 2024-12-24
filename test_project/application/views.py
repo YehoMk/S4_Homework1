@@ -1,21 +1,24 @@
 from django.contrib.auth.views import LoginView, LogoutView
+from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 # from django.db.models import F, Value, CharField
 # # F = Field
 # from django.db.models.functions import Concat
-from django.views.generic import ListView, TemplateView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.views.generic.edit import CreateView, ModelFormMixin, UpdateView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin  # Використовуємо, щоб робити login_requiered з класами
+from django.contrib.auth.mixins import LoginRequiredMixin  # Використовуємо, щоб робити login_requiered з класам
 
-
-from .models.user import User
+from .mixins import SubscribtionLimitationMixin
 from .models.post import Post
 from .models.comment import Comment
+from .models.user import User
+from .models.subscription import Subscription
 from .forms import SignUpForm, LogInForm, PostForm, CommentForm, PostUpdateForm
+from application.constants import ADVANCED_AND_MORE
+from application.choices import SubscriptionTypeChoices
 
 # Для запуску проєкту Django:
 # django-admin startproject test_project
@@ -39,11 +42,12 @@ from .forms import SignUpForm, LogInForm, PostForm, CommentForm, PostUpdateForm
 #     return render(request, "index.html", {"posts": posts})
 
 
-class IndexView(ListView):  # Новий класовий ендпоінт
+class IndexView(SubscribtionLimitationMixin, ListView):  # Новий класовий ендпоінт
     # ListView використовуєтсья для сторінок, що схожі на списокю
     template_name = "index.html"  # HTML, що буде темплейтом
     model = Post  # Модель з якої візбметься все
     context_object_name = "posts"  # Ім'я змінної в Jinja
+    subscription_limitation = ADVANCED_AND_MORE
 
     def get_queryset(self):  # Якщо ми хочемо більш специфічний queryset
         return Post.objects.all().with_user_info()  # Додаємо до querysetу ще інформацію з моделі User
@@ -124,21 +128,21 @@ class SignUpView(CreateView):  # Новий класовий ендпоінт
     #     (pass # Код, щоб отрмати потрібний URL)
 
 
-def log_in(request):
-    if request.method == "POST":
-        form = LogInForm(request, request.POST)
-        print(form.get_user())
-        print(form.errors)
-        if form.is_valid():
-            print("test")
-            login(request, form.get_user())
-            return redirect("index")
-        return render(request, "log_in.html", {"form": form})
-        # username = request.POST["username"]
-        # password = request.POST["password"]
-        # print(username, password)
-    form = LogInForm()
-    return render(request, "log_in.html", {"form": form})
+# def log_in(request):
+#     if request.method == "POST":
+#         form = LogInForm(request, request.POST)
+#         print(form.get_user())
+#         print(form.errors)
+#         if form.is_valid():
+#             print("test")
+#             login(request, form.get_user())
+#             return redirect("index")
+#         return render(request, "log_in.html", {"form": form})
+#         # username = request.POST["username"]
+#         # password = request.POST["password"]
+#         # print(username, password)
+#     form = LogInForm()
+#     return render(request, "log_in.html", {"form": form})
 
 
 class UserLogInView(LoginView):
@@ -246,3 +250,27 @@ class UpdatePostView(UpdateView):
         return reverse_lazy("post_detail", kwargs={"id": self.kwargs["id"]})
 
 
+class SubscriptionInformationView(TemplateView):
+    template_name = "subscribtion_information.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["free_subscribers"] = User.objects.filter(subscription__type=SubscriptionTypeChoices.FREE)  # __ вказує на колонку іншої таблиці
+        context["advanced_subscribers"] = User.objects.filter(subscription__type=SubscriptionTypeChoices.ADVANCED)
+        context["pro_subscribers"] = User.objects.filter(subscription__type=SubscriptionTypeChoices.PRO)
+        return context
+
+
+class FilterTest(TemplateView):
+    template_name = "filter_test.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["posts_with_specific_date"] = Post.objects.filter(created_at__gte="2023-10-12")
+        context["posts_wвith_no_comments"] = Post.objects.filter(comments__isnull=True)
+        context["users_with_active_subscribtion"] = Subscription.objects.filter(is_active=True)
+        context["comments_with_specific_text"] = Comment.objects.filter(content__contains="пр")
+        context["posts_with_title_any_case"] = Post.objects.filter(title__icontains="новини")
+        context["posts_with_more_than_5_comments"] = Post.objects.all().alias(comments_amount=Count("comments")).filter(comments_amount__gt=5)
+        context["Posts_that_have_less_than_3_specific_comments"] = Post.objects.all().alias(comments_amount=Count("user__comments")).filter(comments_amount__lt=3)
+        return context

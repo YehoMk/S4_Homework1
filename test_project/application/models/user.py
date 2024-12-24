@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from application.choices import SubscriptionTypeChoices
 
+from application.managers.user import UserManager
 
 __all__ = ("User", )
 
@@ -12,9 +14,26 @@ __all__ = ("User", )
 # python manage.py migrate application <номер міграціїї до якої треба відкатити. Наприклад "0001". "zero", щоб відкатити всі>
 # (Якщо додати після цього "--fake", то всі зміни будуть вважатись пропущеними для ORM. Хоча в дб вони залишаться. Це можна використовувати, щоб змінити сценарії)
 
-class User(AbstractUser):
-    pass
 
+class User(AbstractUser):
+    @property  # декоратор property потрібен коли треба повернути якість атрибути у особливому форматі
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+        # тепер метод full_name буде повертати цю стрічку
+
+    @property # декоратор property повертає True чи False
+    def is_free_subscription(self):
+        return self.subscription.type == SubscriptionTypeChoices.FREE
+
+    @property
+    def is_advanced_subscription(self):
+        return self.subscription.type == SubscriptionTypeChoices.ADVANCED
+
+    @property
+    def is_pro_subscription(self):
+        return self.subscription.type == SubscriptionTypeChoices.PRO
+
+    objects = UserManager()
 
 # python manage.py shell (відкриваємо Django термінал)
 #   >>> w (Беремо клас User)

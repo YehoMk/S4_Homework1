@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+
+{% block title %}filter test{% endblock %}
+
+
+{% block content %}
+
+  <h3>Posts with no comments:</h3>
+  {% for post in posts_with_no_comments %}
+    {{ post.title }} <br />
+  {% endfor %}
+
+  <h3>Users with an active subscribtion:</h3>
+  {% for subscribtion in users_with_active_subscribtion %}
+    {{ subscribtion.user }} <br />
+  {% endfor %}
+
+  <h3>Comments which contain "пр"</h3>
+  {% for comment in comments_with_specific_text %}
+    {{ comment.content }} <br />
+  {% endfor %}
+
+  <h3>Posts with tile "новини" in any case:</h3>
+  {% for post in posts_with_title_any_case %}
+    {{ post.title }} <br />
+  {% endfor %}
+
+  <h3>Posts that are created after 12.10.2023:</h3>
+  {% for post in posts_with_specific_date %}
+    {{ post.title }} <br />
+  {% endfor %}
+
+  <h3>Posts that have more than 5 comments:</h3>
+  {% for post in posts_with_more_than_5_comments %}
+    {{ post.title }} <br />
+  {% endfor %}
+
+  <h3>Posts that have less than 3 comments made by the creator of the post:</h3>
+  {% for post in Posts_that_have_less_than_3_specific_comments %}
+    {{ post.title }} <br />
+  {% endfor %}
+
+{% endblock %}
